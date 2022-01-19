@@ -1,0 +1,7 @@
+ansible_host: "{{ libvirt_nat.cidr | ansible.netcommon.nthhost(5 + groups['worker'].index(inventory_hostname)) }}"
+spec:
+  cpu: 2
+  ram: 8192
+  disk: 128
+  disk_cache: unsafe
+  mac: "{{ '52:54:00' | community.general.random_mac(seed=inventory_hostname) }}"

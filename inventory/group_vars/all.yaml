@@ -1,0 +1,17 @@
+openshift:
+  name: test6
+  install_version: 4.9.13
+  coreos_version:  4.9.0
+key:
+  pullsecret: "{{ lookup('file', '../pull-secret.json') }}"
+  sshkey: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+# OpenShift Network
+net:
+  domain: lab.local
+  cluster_cidr: 10.128.0.0/14
+  cluster_prefx: 23
+  service: 172.30.0.0/16
+# libvirt net
+libvirt:
+  name: openshiftv6
+  cidr: fd12:dead:beef:2::64
