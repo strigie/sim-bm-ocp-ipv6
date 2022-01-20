@@ -15,3 +15,6 @@ net:
 libvirt:
   name: openshiftv6
   cidr: fd12:dead:beef:2::64
+registry:
+  user: openshift
+  password: openshift

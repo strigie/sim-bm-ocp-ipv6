@@ -1,0 +1,63 @@
+---
+- name: Install podman
+  dnf:
+    name:
+      - podman
+
+- name: Enable and start podman
+  systemd:
+    name: podman.service
+    enabled: yes
+    state: started
+
+- name: Create directory for registry
+  file:
+    path: "{{ registry_dir }}/{{ item }}"
+    state: directory
+    recurse: yes
+  loop:
+    - conf
+    - certs
+    - auth
+    - data
+
+- name: Generate private key for registry
+  community.crypto.openssl_privatekey:
+    path: "{{ registry_dir }}/certs/registry.key"
+    size: "{{ key_size | default('2048') }}"
+    type: "{{ key_type | default('RSA') }}"
+
+- name: Generate an CSR
+  community.crypto.openssl_csr:
+    path: "{{ registry_dir }}/certs/registry.csr"
+    privatekey_path: "{{ registry_dir }}/certs/registry.key"
+    common_name: "{{ ansible_fqdn }}"
+
+- name: Generate cert for registry
+  community.crypto.x509_certificate:
+    path: "{{ registry_dir }}/certs/registry.crt"
+    privatekey_path: "{{ registry_dir }}/certs/registry.key"
+    csr_path: "{{ registry_dir }}/certs/registry.csr"
+    provider: selfsigned
+
+- name: Create htpasswd for registry
+  template:
+    dest: "{{ registry_dir }}/auth/htpasswd"
+    src: htpasswd.j2
+
+- name: Create registry config
+  template:
+    src: config.yaml.j2
+    dest: "{{ registry_dir }}/conf/config.yaml"
+
+- name: Template systemd unit
+  template:
+    src: podman-registry.service.j2
+    dest: "/etc/systemd/system/podman-registry.service"
+
+- name: Enable and start registry
+  systemd:
+    name: podman-registry.service
+    state: started
+    enabled: yes
+    daemon_reload: yes

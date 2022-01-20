@@ -1,0 +1,4 @@
+---
+registry_dir: /opt/registry
+registry_user: openshift
+registry_password: openshift
