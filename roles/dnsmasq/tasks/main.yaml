@@ -1,0 +1,48 @@
+---
+- name: Install rpms
+  dnf:
+    name: dnsmasq
+
+- name: Create directory for dnsmasq config
+  file:
+    path: "{{ workspace }}/dnsmasq"
+    state: directory
+    recurse: yes
+
+- name: Template dnsmasq.conf
+  template:
+    src: dnsmasq.conf.j2
+    dest: "{{ workspace }}/dnsmasq/dnsmasq.conf"
+
+- name: Template hosts.hostfile
+  template:
+    src: hosts.hostfile.j2
+    dest: "{{ workspace }}/dnsmasq/hosts.hostsfile"
+
+- name: Template upstream-resolv.conf
+  template:
+    src: upstream-resolv.conf.j2
+    dest: "{{ workspace }}/dnsmasq/upstream-resolv.conf"
+
+- name: Template systemd unit
+  template:
+    src: dnsmasq-ipv6.service.j2
+    dest: /etc/systemd/system/dnsmasq-ipv6.service
+
+- name: Touch leases file
+  file:
+    path: "{{ workspace }}/dnsmasq/hosts.leases"
+    state: touch
+    selevel: s0
+    serole: object_r
+    setype: dnsmasq_var_run_t
+    seuser: system_u
+
+- name: Start and enable dnsmasq
+  systemd:
+    name: dnsmasq-ipv6.service
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+

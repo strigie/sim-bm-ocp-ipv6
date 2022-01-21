@@ -1,0 +1,28 @@
+strict-order
+bind-dynamic
+bogus-priv
+dhcp-authoritative
+dhcp-range={{ libvirt.name }},{{ libvirt.cidr | ansible.netcommon.nthhost(11) }},{{ libvirt.cidr | ansible.netcommon.nthhost(31) }},4h
+dhcp-option={{ libvirt.name }},option6:dns-server,{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}
+
+resolv-file="{{ workspace }}/dnsmasq/upstream-resolv.conf"
+interface={{ libvirt.name }}
+log-dhcp
+dhcp-lease-max=20
+
+domain={{ net.domain }},{{ libvirt.cidr }},local
+
+address=/apps.{{ net.domain }}/{{ libvirt.cidr | ansible.netcommon.nthhost(2) }}
+host-record=api.{{ net.domain }},{{ libvirt.cidr | ansible.netcommon.nthhost(3) }}
+{% for c in groups['control'] %}
+host-record={{ c }}.{{ net.domain }},{{ hostvars[c].ansible_host }}
+ptr-record={{ hostvars[c].ansible_host | ansible.netcommon.ipaddr('revdns') }},"{{ c }}.{{ net.domain }}"
+{% endfor %}
+{% for w in groups['worker'] %}
+host-record={{ w }}.{{ net.domain }},{{ hostvars[w].ansible_host }}
+ptr-record={{ hostvars[w].ansible_host | ansible.netcommon.ipaddr('revdns') }},"{{ w }}.{{ net.domain }}"
+{% endfor %}
+
+dhcp-hostsfile={{ workspace }}/dnsmasq/hosts.hostsfile
+dhcp-leasefile={{ workspace }}/dnsmasq/hosts.leases
+host-record={{ ansible_fqdn }},{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}

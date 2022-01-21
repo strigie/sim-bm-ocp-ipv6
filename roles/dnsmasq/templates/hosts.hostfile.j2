@@ -1,0 +1,3 @@
+{% for h in groups['openshift'] %}
+{{ hostvars[h].spec.mac }},{{ h }},[{{ hostvars[h].ansible_host }}]
+{% endfor %}

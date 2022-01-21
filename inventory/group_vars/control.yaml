@@ -1,4 +1,4 @@
-ansible_host: "{{ libvirt_nat.cidr | ansible.netcommon.nthhost(2 + groups['control'].index(inventory_hostname)) }}"
+ansible_host: "{{ libvirt.cidr | ansible.netcommon.nthhost(4 + groups['control'].index(inventory_hostname)) }}"
 spec:
   cpu: 4
   ram: 16384
