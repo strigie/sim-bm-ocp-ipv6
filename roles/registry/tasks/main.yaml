@@ -1,8 +1,9 @@
 ---
-- name: Install podman
+- name: Install packages
   dnf:
     name:
       - podman
+      - httpd-tools
 
 - name: Enable and start podman
   systemd:
@@ -21,29 +22,18 @@
     - auth
     - data
 
-- name: Generate private key for registry
-  community.crypto.openssl_privatekey:
-    path: "{{ registry_dir }}/certs/registry.key"
-    size: "{{ key_size | default('2048') }}"
-    type: "{{ key_type | default('RSA') }}"
+- name: Copy x509
+  copy:
+    src: "{{ workspace }}/x509/{{ item.src }}"
+    dest: "{{ registry_dir }}/certs/{{ item.dest }}"
+    remote_src: yes
+  loop:
+    - { src: 'bmsim.crt', dest: 'registry.crt' }
+    - { src: 'bmsim.key', dest: 'registry.key' }
 
-- name: Generate an CSR
-  community.crypto.openssl_csr:
-    path: "{{ registry_dir }}/certs/registry.csr"
-    privatekey_path: "{{ registry_dir }}/certs/registry.key"
-    common_name: "{{ ansible_fqdn }}"
-
-- name: Generate cert for registry
-  community.crypto.x509_certificate:
-    path: "{{ registry_dir }}/certs/registry.crt"
-    privatekey_path: "{{ registry_dir }}/certs/registry.key"
-    csr_path: "{{ registry_dir }}/certs/registry.csr"
-    provider: selfsigned
-
-- name: Create htpasswd for registry
-  template:
-    dest: "{{ registry_dir }}/auth/htpasswd"
-    src: htpasswd.j2
+# Ansible modules for this needs to many dependencies to make it worthwhile
+- name: Create htpasswd file
+  command: htpasswd -Bbc "{{ registry_dir}}/auth/htpasswd" "{{ registry.user }}" "{{ registry.password }}" 
 
 - name: Create registry config
   template:
@@ -58,6 +48,6 @@
 - name: Enable and start registry
   systemd:
     name: podman-registry.service
-    state: started
+    state: restarted
     enabled: yes
     daemon_reload: yes

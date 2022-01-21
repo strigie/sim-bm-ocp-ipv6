@@ -1,4 +1,2 @@
 ---
-registry_dir: /opt/registry
-registry_user: openshift
-registry_password: openshift
+registry_dir: "{{ workspace }}/registry"

@@ -17,18 +17,6 @@
     virtualenv: "{{ sushy_dir }}"
     virtualenv_site_packages: yes
 
-- name: Generate private key for sushy server
-  community.crypto.openssl_privatekey:
-    path: "{{ sushy_dir }}/sushy.key"
-    size: "{{ key_size | default('2048') }}"
-    type: "{{ key_type | default('RSA') }}"
-
-- name: Generate cert for sushy server
-  community.crypto.x509_certificate:
-    path: "{{ sushy_dir }}/sushy.crt"
-    privatekey_path: "{{ sushy_dir }}/sushy.key"
-    provider: selfsigned
-
 - name: Template sushy.conf
   template:
     src: sushy.conf.j2

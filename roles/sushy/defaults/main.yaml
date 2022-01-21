@@ -1,1 +1,1 @@
-sushy_dir: /opt/sushy-tools
+sushy_dir: "{{ workspace }}/sushy"
