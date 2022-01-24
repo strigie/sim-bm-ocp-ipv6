@@ -1,0 +1,75 @@
+interface {{ libvirt.bridge }}
+{
+	AdvSendAdvert on;
+
+# This may be needed on some interfaces which are not active when
+# radvd starts, but become available later on; see man page for details.
+
+	# IgnoreIfMissing on;
+
+#
+# These settings cause advertisements to be sent every 3-10 seconds.  This
+# range is good for 6to4 with a dynamic IPv4 address, but can be greatly
+# increased when not using 6to4 prefixes.
+#
+
+	MinRtrAdvInterval 30;
+	MaxRtrAdvInterval 100;
+
+#
+# You can use AdvDefaultPreference setting to advertise the preference of
+# the router for the purposes of default router determination.
+# NOTE: This feature is still being specified and is not widely supported!
+#
+	AdvDefaultPreference low;
+
+#
+# Disable Mobile IPv6 support
+#
+	AdvHomeAgentFlag off;
+
+	prefix {{ libvirt.cidr }}
+	{
+		AdvOnLink on;
+		AdvAutonomous on;
+		AdvRouterAddr off;
+	};
+
+
+#		Base6to4Interface ppp0;
+
+	route ::/0
+	{
+		AdvRoutePreference low;
+		AdvRouteLifetime 9000;
+                RemoveRoute on;
+	};
+
+#
+# RDNSS
+# NOTE: This feature is not very widely implemented.
+#
+#        RDNSS 2001:db8::1 2001:db8::2
+#        {
+#                AdvRDNSSLifetime 30;
+#        };
+
+#
+# DNS Search Lists
+#
+#        DNSSL branch.example.com example.com
+#        {
+#                AdvDNSSLLifetime 30;
+#        };
+
+#
+# RFC8908 Captive-Portal API URL
+#
+# See RFC8952 Captive Portal Architecture, RFC8910 Captive-Portal
+# Identification in DHCP and Router Advertisements (RAs) and
+# RFC8908 Captive Portal API for more information.
+#
+
+	# AdvCaptivePortalAPI "https://portal.example.net/api/capport.json";
+
+};
