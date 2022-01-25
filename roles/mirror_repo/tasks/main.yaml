@@ -1,0 +1,17 @@
+---
+- name: Create docker config directory
+  file:
+    state: directory
+    path: /root/.docker/
+    mode: 0700
+
+- name: Create root pull secret
+  copy:
+    dest: /root/.docker/config.json
+    content: "{{ key.pullsecret }}"
+
+- name: Podman login
+  command: "podman login {{ ansible_host }}:5000 -u {{ registry.user }} -p {{ registry.password }} --authfile /root/.docker/config.json"
+
+- name: Mirror release
+  command: "{{ workspace }}/bin/oc adm release mirror --from=quay.io/openshift-release-dev/ocp-release:{{ openshift.install_version }}-x86_64 --to={{  ansible_host }}:5000/ocp4 --to-release-image={{ ansible_host }}:5000/ocp4/release:{{ openshift.install_version }}-x86_64"

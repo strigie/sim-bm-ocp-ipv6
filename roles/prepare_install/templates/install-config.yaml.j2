@@ -1,0 +1,56 @@
+apiVersion: v1
+baseDomain: {{ net.domain }}
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: 0
+controlPlane:
+  hyperthreading: Enabled
+  name: control
+  replicas: {{ groups['control'] | length }}
+  platform:
+    baremetal: {}
+metadata:
+  name: {{ openshift.name }}
+networking:
+  networkType: OVNKubernetes
+  machineCIDR: {{ libvirt.cidr }}
+  clusterNetworks:
+  - cidr: {{ net.cluster_cidr }}
+    hostPrefix: {{ net.cluster_prefx }}
+  serviceNetwork:
+  - {{ net.service }}
+platform:
+  baremetal:
+    externalBridge: {{ libvirt.bridge }}
+    bootstrapProvisioningIP: {{ libvirt.cidr | ansible.netcommon.nthhost(20) }}
+    provisioningNetwork: "Disabled"
+    apiVIP: {{ libvirt.cidr | ansible.netcommon.nthhost(3) }}
+    ingressVIP: {{ libvirt.cidr | ansible.netcommon.nthhost(2) }}
+    hosts:
+{% for c in groups['control'] %}
+      - name: {{ c }}
+        role: master
+        bmc:
+          address: redfish-virtualmedia://[{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}:8080/redfish/v1/Systems/{{ hostvars[c].uuid }}
+          username: ADMIN
+          password: ADMIN
+          disableCertificateVerification: True
+        bootMACAddress: {{ hostvars[c].spec.mac }}
+        bootMode: "legacy"
+        rootDeviceHints:
+          deviceName: "/dev/vda"
+{% endfor %}
+imageContentSources:
+  - mirrors:
+    - {{ ansible_host }}:5000/ocp4
+    - {{ ansible_host }}:5000/ocp4/release
+    source: quay.io/openshift-release-dev/ocp-release
+  - mirrors:
+    - {{ ansible_host }}:5000/ocp4
+    - {{ ansible_host }}:5000/ocp4/release
+    source: quay.io/openshift-release-dev/ocp-v4.9-art-dev
+additionalTrustBundle: |
+  {{ ca.content | b64decode | indent(width=2)}}
+sshKey: '{{ key.sshkey }}'
+pullSecret: '{"auths":{"{{ ansible_host }}":{"auth":"{{ (registry.user + ':' + registry.password) | b64encode }}"}}}'

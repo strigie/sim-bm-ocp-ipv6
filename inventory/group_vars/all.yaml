@@ -8,9 +8,9 @@ key:
 # OpenShift Network
 net:
   domain: ipv6.virtual.cluster.lab
-  cluster_cidr: 10.128.0.0/14
-  cluster_prefx: 23
-  service: 172.30.0.0/16
+  cluster_cidr: fc01::/48
+  cluster_prefx: 64
+  service: fd02::/112
 # libvirt net
 libvirt:
   name: openshiftv6

@@ -1,0 +1,40 @@
+---
+- name: Get rhcos stream
+  command: "{{ workspace }}/bin/openshift-install coreos print-stream-json"
+  register: stream
+
+- set_fact:
+    print_stream: "{{ stream.stdout|from_json }}"
+
+#- name: Test
+#  debug:
+#    var: print_stream['architectures']['x86_64']['artifacts']['openstack']['formats']['qcow2.gz']['disk']['location'] | basename
+
+- name: Get Openstack Qcow2 image
+  get_url:
+    url: "{{ print_stream['architectures']['x86_64']['artifacts']['openstack']['formats']['qcow2.gz']['disk']['location'] }}"
+    dest: "{{ workspace }}/apache/data/{{ print_stream['architectures']['x86_64']['artifacts']['openstack']['formats']['qcow2.gz']['disk']['location'] | basename }}"
+    mode: 0644
+    checksum: "sha256:{{ print_stream['architectures']['x86_64']['artifacts']['openstack']['formats']['qcow2.gz']['disk']['sha256'] }}"
+
+- name: Get Qemu image
+  get_url:
+    url: "{{ print_stream['architectures']['x86_64']['artifacts']['qemu']['formats']['qcow2.gz']['disk']['location'] }}"
+    dest: "{{ workspace }}/apache/data/{{ print_stream['architectures']['x86_64']['artifacts']['qemu']['formats']['qcow2.gz']['disk']['location'] | basename }}"
+    mode: 0644
+    checksum: "sha256:{{ print_stream['architectures']['x86_64']['artifacts']['qemu']['formats']['qcow2.gz']['disk']['sha256'] }}"
+
+- name: Create dir for cluster install
+  file:
+    path: "{{ workspace }}/{{ openshift.name }}"
+    state: directory
+
+- name: Get x509 CA
+  slurp:
+    src: "{{ workspace }}/x509/bmsimca.crt"
+  register: ca
+
+- name: Template install config
+  template:
+    src: install-config.yaml.j2
+    dest: "{{ workspace }}/{{ openshift.name }}/install-config.yaml"
