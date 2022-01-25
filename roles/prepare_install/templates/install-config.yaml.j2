@@ -22,7 +22,7 @@ networking:
   - {{ net.service }}
 platform:
   baremetal:
-    externalBridge: {{ libvirt.bridge }}
+    externalBridge: {{ libvirt.name }}
     bootstrapProvisioningIP: {{ libvirt.cidr | ansible.netcommon.nthhost(20) }}
     provisioningNetwork: "Disabled"
     apiVIP: {{ libvirt.cidr | ansible.netcommon.nthhost(3) }}
@@ -32,7 +32,7 @@ platform:
       - name: {{ c }}
         role: master
         bmc:
-          address: redfish-virtualmedia://[{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}:8080/redfish/v1/Systems/{{ hostvars[c].uuid }}
+          address: redfish-virtualmedia://[{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}]:8000/redfish/v1/Systems/{{ hostvars[c].uuid }}
           username: ADMIN
           password: ADMIN
           disableCertificateVerification: True
@@ -43,14 +43,14 @@ platform:
 {% endfor %}
 imageContentSources:
   - mirrors:
-    - {{ ansible_host }}:5000/ocp4
-    - {{ ansible_host }}:5000/ocp4/release
+    - registry.{{ net.domain }}:5000/ocp4
+    - registry.{{ net.domain }}:5000/ocp4/release
     source: quay.io/openshift-release-dev/ocp-release
   - mirrors:
-    - {{ ansible_host }}:5000/ocp4
-    - {{ ansible_host }}:5000/ocp4/release
+    - registry.{{ net.domain }}:5000/ocp4
+    - registry.{{ net.domain }}:5000/ocp4/release
     source: quay.io/openshift-release-dev/ocp-v4.9-art-dev
 additionalTrustBundle: |
   {{ ca.content | b64decode | indent(width=2)}}
 sshKey: '{{ key.sshkey }}'
-pullSecret: '{"auths":{"{{ ansible_host }}":{"auth":"{{ (registry.user + ':' + registry.password) | b64encode }}"}}}'
+pullSecret: '{"auths":{"registry.{{ net.domain }}":{"auth":"{{ (registry.user + ':' + registry.password) | b64encode }}"}}}'

@@ -44,3 +44,19 @@
     command: create
     name: "{{ libvirt.name }}"
     state: active
+
+- name: firewalld open ports for libvirt
+  firewalld:
+    zone: libvirt
+    port: "{{ item }}"
+    state: enabled
+    permanent: yes
+    immediate: yes
+  loop:
+    - 5000/tcp
+    - 8000/tcp
+    - 9080/tcp
+    - 123/tcp
+    - 123/udp
+    - 53/tcp
+    - 53/udp

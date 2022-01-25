@@ -4,6 +4,10 @@
     state: directory
     recurse: yes
 
+- name: Install Python crypto
+  dnf:
+    name: python3-cryptography
+
 # TODO: passphrase!
 - name: Generate private key for bmsim CA
   community.crypto.openssl_privatekey:
@@ -41,7 +45,9 @@
   community.crypto.openssl_csr_pipe:
     privatekey_path: "{{ workspace }}/x509/bmsim.key"
     subject_alt_name:
-      - "DNS:{{ ansible_fqdn }}"
+      - "DNS:registry.{{ net.domain }}"
+      - "DNS:bmc.{{ net.domain }}"
+      - "DNS:{{ ansible_host }}"
   register: csr
 
 - name: Generate cert for bmsim

@@ -1,6 +1,6 @@
 ---
 - name: Get rhcos stream
-  command: "{{ workspace }}/bin/openshift-install coreos print-stream-json"
+  command: "{{ workspace }}/bin/openshift-baremetal-install coreos print-stream-json"
   register: stream
 
 - set_fact:

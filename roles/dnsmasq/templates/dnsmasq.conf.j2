@@ -26,3 +26,5 @@ ptr-record={{ hostvars[w].ansible_host | ansible.netcommon.ipaddr('revdns') }},"
 dhcp-hostsfile={{ workspace }}/dnsmasq/hosts.hostsfile
 dhcp-leasefile={{ workspace }}/dnsmasq/hosts.leases
 host-record={{ ansible_fqdn }},{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}
+host-record=registry.{{ net.domain }},{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}
+host-record=bmc.{{ net.domain }},{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}

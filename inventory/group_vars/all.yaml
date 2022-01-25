@@ -13,9 +13,9 @@ net:
   service: fd02::/112
 # libvirt net
 libvirt:
-  name: openshiftv6
+  name: openshift0
   cidr: fd12:dead:beef:2::/64
-  bridge: openshift0
+#  cidr: 2620:52:0:1305::/64
 registry:
   user: openshift
   password: openshift

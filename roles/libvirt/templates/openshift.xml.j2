@@ -1,6 +1,6 @@
 <network>
   <name>{{ libvirt.name }}</name>
-  <bridge name='{{ libvirt.bridge }}' stp='yes' delay='0'/>
+  <bridge name='{{ libvirt.name }}' stp='on' delay='0'/>
   <ip family="ipv6" address='{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}' prefix='{{ libvirt.cidr | ansible.netcommon.ipaddr('prefix') }}' >
   </ip>
 </network>

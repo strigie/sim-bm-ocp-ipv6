@@ -1,5 +1,5 @@
 [kvm_host]
-dhaupt-hive.cloud.lab.eng.bos.redhat.com
+dhaupt.cloud.lab.eng.bos.redhat.com
 [control]
 control[1:3]
 [worker]
