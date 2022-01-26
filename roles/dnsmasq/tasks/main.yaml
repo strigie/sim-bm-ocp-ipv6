@@ -41,7 +41,7 @@
 - name: Start and enable dnsmasq
   systemd:
     name: dnsmasq-ipv6.service
-    state: started
+    state: restarted
     enabled: yes
     daemon_reload: yes
 

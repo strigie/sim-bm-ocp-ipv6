@@ -1,15 +1,4 @@
 ---
-- name: Create docker config directory
-  file:
-    state: directory
-    path: /root/.docker/
-    mode: 0700
-
-- name: Create root pull secret
-  copy:
-    dest: /root/.docker/config.json
-    content: "{{ key.pullsecret }}"
-
 - name: Podman login
   command: "podman login {{ ansible_host }}:5000 -u {{ registry.user }} -p {{ registry.password }} --authfile /root/.docker/config.json"
 

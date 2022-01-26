@@ -6,7 +6,7 @@ dhcp-range={{ libvirt.name }},{{ libvirt.cidr | ansible.netcommon.nthhost(11) }}
 dhcp-option={{ libvirt.name }},option6:dns-server,{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}
 
 resolv-file="{{ workspace }}/dnsmasq/upstream-resolv.conf"
-interface={{ libvirt.name }}
+except-interface=lo
 log-dhcp
 dhcp-lease-max=20
 
