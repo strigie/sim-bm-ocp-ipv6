@@ -16,7 +16,7 @@
     name: libvirtd
     state: restarted
 
-- name: check if openshift nat already exists
+- name: check if openshift network already exists
   virt_net:
     command: list_nets
   register: all_nets
