@@ -45,4 +45,10 @@
     enabled: yes
     daemon_reload: yes
 
-
+# TODO: Play nice with networkmanager
+- name: Insert dnsmasq into resolv.conf
+  lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver {{ libvirt.cidr | ansible.netcommon.nthhost(1) }}"
+    firstmatch: yes
+    insertbefore: "^nameserver.*$"

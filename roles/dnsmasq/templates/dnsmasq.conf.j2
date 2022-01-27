@@ -1,19 +1,24 @@
 strict-order
 bind-dynamic
 bogus-priv
-dhcp-authoritative
+#dhcp-authoritative
 dhcp-range={{ libvirt.name }},{{ libvirt.cidr | ansible.netcommon.nthhost(11) }},{{ libvirt.cidr | ansible.netcommon.nthhost(31) }},4h
 dhcp-option={{ libvirt.name }},option6:dns-server,{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}
+#rhcos doesnt work with this (IPv6) yet, but it doesn't hurt to have it
+#https://bugzilla.redhat.com/show_bug.cgi?id=1800901
+dhcp-option={{ libvirt.name }},option6:ntp-server,[::]
 
+#no-resolv
+interface={{ libvirt.name }}
 resolv-file="{{ workspace }}/dnsmasq/upstream-resolv.conf"
-except-interface=lo
 log-dhcp
 dhcp-lease-max=20
 
 domain={{ net.domain }},{{ libvirt.cidr }},local
 
-address=/apps.{{ net.domain }}/{{ libvirt.cidr | ansible.netcommon.nthhost(2) }}
-host-record=api.{{ net.domain }},{{ libvirt.cidr | ansible.netcommon.nthhost(3) }}
+address=/apps.{{ openshift.name }}.{{ net.domain }}/{{ libvirt.cidr | ansible.netcommon.nthhost(2) }}
+host-record=api.{{ openshift.name }}.{{ net.domain }},{{ libvirt.cidr | ansible.netcommon.nthhost(3) }}
+host-record={{ ansible_fqdn }},{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}
 {% for c in groups['control'] %}
 host-record={{ c }}.{{ net.domain }},{{ hostvars[c].ansible_host }}
 ptr-record={{ hostvars[c].ansible_host | ansible.netcommon.ipaddr('revdns') }},"{{ c }}.{{ net.domain }}"
@@ -25,6 +30,3 @@ ptr-record={{ hostvars[w].ansible_host | ansible.netcommon.ipaddr('revdns') }},"
 
 dhcp-hostsfile={{ workspace }}/dnsmasq/hosts.hostsfile
 dhcp-leasefile={{ workspace }}/dnsmasq/hosts.leases
-host-record={{ ansible_fqdn }},{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}
-host-record=registry.{{ net.domain }},{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}
-host-record=bmc.{{ net.domain }},{{ libvirt.cidr | ansible.netcommon.nthhost(1) }}
