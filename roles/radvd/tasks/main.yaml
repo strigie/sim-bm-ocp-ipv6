@@ -10,7 +10,7 @@
 
 - name: Allow router advertisment on libvirt network
   sysctl:
-    name: "net.ipv6.conf.{{ libvirt.name }}.accept_ra"
+    name: "net.ipv6.conf.all.accept_ra"
     value: 2
   
 - name: Start and enable radvd
